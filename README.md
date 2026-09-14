@@ -5,34 +5,6 @@
 این پروژه یک صرافی ارز دیجیتال با Django هست که با Gunicorn اجراش می‌کنیم و
 دیتابیس PostgreSQL هم روی Kubernetes بالا میاد.
 
-## قبل از رفتن روی Production
-
-
-2. Secret با نام `cryptocurrency-exchange-secrets` رو داخل namespace `crypto`
-   می‌سازیم. مقدارهای `DJANGO_SECRET_KEY`، رمز دیتابیس و بقیه اطلاعات حساس رو
-   فقط از Secret Manager یا متغیرهای امن CI می‌خونیم؛ داخل Git قرارشون نمی‌دیم.
-   فایل `secret.example.yaml` فقط نمونه‌ست.
-
-3. داخل `deployment.yaml` آدرس image نمونه رو با registry و image واقعی خودمون
-   عوض می‌کنیم. برای Production بهتره image رو با digest ثابت deploy کنیم.
-
-4. این فایل‌ها رو داخل namespace `crypto` apply می‌کنیم:
-
-</div>
-
-<div dir="ltr" align="left">
-
-```bash
-kubectl apply -f configmap.yaml
-kubectl apply -f secret.example.yaml
-kubectl apply -f postgresql.yaml
-kubectl apply -f deployment.yaml
-kubectl apply -f backup.yaml
-```
-
-</div>
-
-<div dir="rtl" align="right">
 
 ## روند CI/CD
 
