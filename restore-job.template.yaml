@@ -1,11 +1,8 @@
-# TEMPLATE ONLY: set BACKUP_FILE to an existing file from the postgresql-backups PVC.
-# Stop application writes first. This command uses --clean and is destructive to
-# objects in the target database that are also present in the backup.
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: cryptocurrency-exchange-postgresql-restore
-  namespace: cryptocurrency-exchange
+  namespace: crypto
 spec:
   backoffLimit: 0
   template:
