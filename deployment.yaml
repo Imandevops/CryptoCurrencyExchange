@@ -2,9 +2,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: cryptocurrency-exchange-migrate
-  namespace: cryptocurrency-exchange
+  namespace: crypto
   annotations:
-    # Apply this Job after PostgreSQL is Ready and before the Deployment.
     purpose: database-migration
 spec:
   backoffLimit: 6
@@ -47,7 +46,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cryptocurrency-exchange
-  namespace: cryptocurrency-exchange
+  namespace: crypto
 spec:
   replicas: 2
   selector:
@@ -110,7 +109,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: crypto-exchange
-  namespace: cryptocurrency-exchange
+  namespace: crypto
 spec:
   type: ClusterIP
   selector:
