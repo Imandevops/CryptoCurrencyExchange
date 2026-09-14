@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgresql-backups
+  namespace: cryptocurrency-exchange
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  # Use a StorageClass independent from the PostgreSQL data volume when available.
+  # storageClassName: backup-rwo
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cryptocurrency-exchange-postgresql-backup
+  namespace: cryptocurrency-exchange
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 604800
+      template:
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            fsGroup: 999
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: pg-dump
+              image: postgres:16.4-bookworm
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: PGHOST
+                  valueFrom:
+                    configMapKeyRef:
+                      name: cryptocurrency-exchange-config
+                      key: DATABASE_HOST
+                - name: PGPORT
+                  valueFrom:
+                    configMapKeyRef:
+                      name: cryptocurrency-exchange-config
+                      key: DATABASE_PORT
+                - name: PGDATABASE
+                  valueFrom:
+                    configMapKeyRef:
+                      name: cryptocurrency-exchange-config
+                      key: DATABASE_NAME
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef:
+                      name: cryptocurrency-exchange-secrets
+                      key: DATABASE_USER
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: cryptocurrency-exchange-secrets
+                      key: DATABASE_PASSWORD
+              command:
+                - sh
+                - -ec
+                - |
+                  timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+                  backup="/backups/exchange-${timestamp}.dump"
+                  pg_dump --format=custom --no-owner --no-privileges --file="$backup"
+                  pg_restore --list "$backup" >/dev/null
+                  find /backups -type f -name 'exchange-*.dump' -mtime +14 -delete
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+          volumes:
+            - name: backups
+              persistentVolumeClaim:
+                claimName: postgresql-backups

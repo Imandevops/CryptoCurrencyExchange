@@ -1,0 +1,79 @@
+# TEMPLATE ONLY: set BACKUP_FILE to an existing file from the postgresql-backups PVC.
+# Stop application writes first. This command uses --clean and is destructive to
+# objects in the target database that are also present in the backup.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cryptocurrency-exchange-postgresql-restore
+  namespace: cryptocurrency-exchange
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: pg-restore
+          image: postgres:16.4-bookworm
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PGHOST
+              valueFrom:
+                configMapKeyRef:
+                  name: cryptocurrency-exchange-config
+                  key: DATABASE_HOST
+            - name: PGPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: cryptocurrency-exchange-config
+                  key: DATABASE_PORT
+            - name: PGDATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: cryptocurrency-exchange-config
+                  key: DATABASE_NAME
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: cryptocurrency-exchange-secrets
+                  key: DATABASE_USER
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cryptocurrency-exchange-secrets
+                  key: DATABASE_PASSWORD
+            - name: BACKUP_FILE
+              value: "REPLACE_WITH_exchange-YYYYMMDDTHHMMSSZ.dump"
+          command:
+            - sh
+            - -ec
+            - |
+              test "$BACKUP_FILE" != "REPLACE_WITH_exchange-YYYYMMDDTHHMMSSZ.dump"
+              test -r "/backups/$BACKUP_FILE"
+              pg_restore --clean --if-exists --no-owner --no-privileges \
+                --dbname="$PGDATABASE" "/backups/$BACKUP_FILE"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: backups
+              mountPath: /backups
+              readOnly: true
+      volumes:
+        - name: backups
+          persistentVolumeClaim:
+            claimName: postgresql-backups
