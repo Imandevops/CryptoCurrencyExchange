@@ -106,7 +106,7 @@ python manage.py migrate <app> <migration>
 
 ## کارهایی که برای Production بهتره انجام بدیم
 
-- imageهای Python، PostgreSQL و برنامه رو با digest ثابت deploy کنیم.
+- image ها
 - static fileها رو با Ingress یا NGINX/static server سرو کنیم؛ Gunicorn خودش برای
   سرو static مناسب نیست.
 - یک endpoint مثل `/healthz` اضافه کنیم تا readiness و liveness probeها به صفحه
