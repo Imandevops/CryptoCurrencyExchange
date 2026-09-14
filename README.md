@@ -106,7 +106,8 @@ python manage.py migrate <app> <migration>
 
 ## کارهایی که برای Production بهتره انجام بدیم
 
-- image ها
+
+- ایمیج ها باید بصورت مشخص ورژن داشته باشند تا در صورت مشکل عیب یابی به درتسی انجام شود   مثال crypto:v.1.1.0
 - static fileها رو با Ingress یا NGINX/static server سرو کنیم؛ Gunicorn خودش برای
   سرو static مناسب نیست.
 - یک endpoint مثل `/healthz` اضافه کنیم تا readiness و liveness probeها به صفحه
