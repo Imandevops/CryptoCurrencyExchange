@@ -7,9 +7,6 @@
 
 ## قبل از رفتن روی Production
 
-1. image رو با فایل `dockerfile` می‌سازیم. برنامه داخل کانتینر با user معمولی
-   اجرا میشه، نه root. UID/GID این user برابر `10001` هست و Gunicorn روی پورت
-   `8000` اجرا میشه.
 
 2. Secret با نام `cryptocurrency-exchange-secrets` رو داخل namespace `crypto`
    می‌سازیم. مقدارهای `DJANGO_SECRET_KEY`، رمز دیتابیس و بقیه اطلاعات حساس رو
