@@ -1,7 +1,7 @@
 # CryptoCurrency Exchange
 
 اپلیکیشن صرافی ارز دیجیتال بر پایهٔ Django 4.1 که با Gunicorn اجرا می‌شود و
-manifestهای Kubernetes برای PostgreSQL تک‌نمونه دارد.
+manifestهای Kubernetes برای PostgreSQL  دارد.
 
 ## پیش‌نیازهای Production
 
