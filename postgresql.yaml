@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgresql-data
-  namespace: cryptocurrency-exchange
+  namespace: crypto
 spec:
   accessModes:
     - ReadWriteOnce
@@ -16,7 +16,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgresql
-  namespace: cryptocurrency-exchange
+  namespace: crypto
 spec:
   replicas: 1
   strategy:
@@ -86,10 +86,6 @@ spec:
             limits:
               cpu: "1"
               memory: 1Gi
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
           volumeMounts:
             - name: postgresql-data
               mountPath: /var/lib/postgresql/data
@@ -102,7 +98,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgresql
-  namespace: cryptocurrency-exchange
+  namespace: crypto
 spec:
   type: ClusterIP
   selector:
